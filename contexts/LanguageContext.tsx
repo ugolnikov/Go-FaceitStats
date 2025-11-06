@@ -37,22 +37,49 @@ function getBrowserLanguage(): Language {
   return 'en'
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en')
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
+// Функция для синхронного получения начального языка
+function getInitialLanguage(): Language {
+  if (typeof window === 'undefined') return 'en'
+  
+  try {
     // Сначала проверяем сохраненный язык
     const savedLang = getLanguage() as Language
     if (savedLang && ['ru', 'en', 'zh', 'es', 'de'].includes(savedLang)) {
-      setLanguageState(savedLang)
-    } else {
-      // Если нет сохраненного, определяем язык браузера
-      const browserLang = getBrowserLanguage()
-      setLanguageState(browserLang)
-      saveLanguage(browserLang)
+      return savedLang
     }
+    
+    // Если нет сохраненного, определяем язык браузера
+    const browserLang = getBrowserLanguage()
+    // Сохраняем асинхронно, чтобы не блокировать рендеринг
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        try {
+          saveLanguage(browserLang)
+        } catch {}
+      }, 0)
+    }
+    return browserLang
+  } catch {
+    return 'en'
+  }
+}
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  // Инициализируем язык синхронно при первом рендере
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage)
+
+  // Обновляем язык только если он изменился в другом месте
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedLang = getLanguage() as Language
+      if (savedLang && ['ru', 'en', 'zh', 'es', 'de'].includes(savedLang)) {
+        setLanguageState(savedLang)
+      }
+    }
+    
+    // Слушаем изменения в localStorage
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
   const setLanguage = (lang: Language) => {
@@ -61,15 +88,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = getTranslations(language)
-
-  // Пока не загрузился, используем английский для избежания ошибок гидратации
-  if (!mounted) {
-    return (
-      <LanguageContext.Provider value={{ language: 'en', setLanguage, t: getTranslations('en') }}>
-        {children}
-      </LanguageContext.Provider>
-    )
-  }
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
