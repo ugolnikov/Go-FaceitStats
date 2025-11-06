@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 
 async function getPlayerData(slug: string) {
   try {
     const decodedSlug = decodeURIComponent(slug)
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
     
     const response = await fetch(
       `${baseUrl}/api/faceit`,
@@ -36,9 +34,9 @@ async function getPlayerData(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const slug = params.slug
+  const { slug } = await params
   const decodedSlug = decodeURIComponent(slug)
   
   // Пытаемся получить данные игрока для метаданных

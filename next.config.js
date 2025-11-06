@@ -30,9 +30,6 @@ const nextConfig = {
   // Оптимизация производительности
   poweredByHeader: false,
   
-  // Оптимизация сборки
-  swcMinify: true,
-  
   // Экспериментальные функции для производительности
   experimental: {
     optimizeCss: true,
