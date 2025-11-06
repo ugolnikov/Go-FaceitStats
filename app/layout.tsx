@@ -4,7 +4,6 @@ import { LanguageProvider } from '@/contexts/LanguageContext'
 import favicon from './src/favicon.ico'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://faceit-stats.vercel.app'),
   title: {
     default: 'Faceit CS2 Stats - Статистика игроков Faceit',
     template: '%s | Faceit CS2 Stats'
@@ -66,7 +65,6 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <link rel="icon" href={favicon.src} />
-        <link rel="canonical" href={process.env.NEXT_PUBLIC_SITE_URL || 'https://faceit-stats.vercel.app'} />
         <link rel="preconnect" href="https://open.faceit.com" />
         <link rel="dns-prefetch" href="https://open.faceit.com" />
         <link rel="preconnect" href="https://faceit-cdn.net" />

@@ -22,7 +22,6 @@ npm install
 2. Создайте файл `.env.local` в корне проекта:
 ```
 FACEIT_API_KEY=your_faceit_api_key_here
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 Для получения API ключа:
@@ -31,7 +30,6 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Для продакшена (Vercel):**
 - `FACEIT_API_KEY` - ваш Faceit API ключ
-- `NEXT_PUBLIC_SITE_URL` - URL вашего сайта (например, `https://your-app.vercel.app`)
 
 3. Запустите приложение в режиме разработки:
 ```bash
@@ -91,7 +89,6 @@ npm start
 1. Подключите репозиторий к Vercel
 2. Добавьте переменные окружения:
    - `FACEIT_API_KEY` - ваш Faceit API ключ
-   - `NEXT_PUBLIC_SITE_URL` - URL вашего сайта
 3. Деплой произойдет автоматически
 
 После деплоя проверьте:

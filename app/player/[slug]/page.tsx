@@ -105,7 +105,8 @@ export default function PlayerPage() {
     }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://faceit-stats.vercel.app'
+  // Определяем URL автоматически на клиенте
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   
   // Структурированные данные для игрока
   const structuredData = stats ? {
@@ -113,7 +114,7 @@ export default function PlayerPage() {
     '@type': 'Person',
     name: stats.player.nickname,
     description: `Статистика игрока ${stats.player.nickname} на Faceit CS2`,
-    url: `${baseUrl}/player/${slug}`,
+    ...(baseUrl && { url: `${baseUrl}/player/${slug}` }),
     image: stats.player.avatar,
     sameAs: [
       stats.player.faceit_url,

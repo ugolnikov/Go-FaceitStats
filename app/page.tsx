@@ -77,14 +77,15 @@ export default function Home() {
     setTimeout(() => handleSubmit(), 100)
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://faceit-stats.vercel.app'
+  // Определяем URL автоматически на клиенте
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Faceit CS2 Stats',
     description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке. ELO, K/D, ADR, винрейт и многое другое.',
-    url: baseUrl,
+    ...(baseUrl && { url: baseUrl }),
     applicationCategory: 'GameApplication',
     operatingSystem: 'Web',
     offers: {
