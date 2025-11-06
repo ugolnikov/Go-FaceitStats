@@ -1,0 +1,81 @@
+import type { Metadata } from 'next'
+import './globals.css'
+import { LanguageProvider } from '@/contexts/LanguageContext'
+import favicon from './src/favicon.ico'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://faceit-stats.vercel.app'),
+  title: {
+    default: 'Faceit CS2 Stats - Статистика игроков Faceit',
+    template: '%s | Faceit CS2 Stats'
+  },
+  description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке. ELO, K/D, ADR, винрейт и многое другое.',
+  keywords: ['faceit', 'cs2', 'counter-strike', 'статистика', 'stats', 'elo', 'faceit stats', 'cs2 stats'],
+  authors: [{ name: 'Faceit Stats' }],
+  creator: 'Faceit Stats',
+  publisher: 'Faceit Stats',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ru_RU',
+    url: '/',
+    siteName: 'Faceit CS2 Stats',
+    title: 'Faceit CS2 Stats - Статистика игроков Faceit',
+    description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке. ELO, K/D, ADR, винрейт и многое другое.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Faceit CS2 Stats',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Faceit CS2 Stats - Статистика игроков Faceit',
+    description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    // Добавьте здесь коды верификации для Google, Yandex и т.д. если нужно
+  },
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="ru">
+      <head>
+        <link rel="icon" href={favicon.src} />
+        <link rel="canonical" href={process.env.NEXT_PUBLIC_SITE_URL || 'https://faceit-stats.vercel.app'} />
+        <link rel="preconnect" href="https://open.faceit.com" />
+        <link rel="dns-prefetch" href="https://open.faceit.com" />
+        <link rel="preconnect" href="https://faceit-cdn.net" />
+        <link rel="dns-prefetch" href="https://faceit-cdn.net" />
+      </head>
+      <body>
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
+    </html>
+  )
+}
+
