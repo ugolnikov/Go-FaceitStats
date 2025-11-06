@@ -3,6 +3,14 @@ import axios from 'axios'
 
 const FACEIT_API_BASE = 'https://open.faceit.com/data/v4'
 
+// Настройка axios с таймаутами для оптимизации
+const axiosInstance = axios.create({
+  timeout: 10000, // 10 секунд таймаут
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
 // Получение заголовков для API запросов
 function getApiHeaders() {
     const apiKey = process.env.FACEIT_API_KEY
@@ -53,7 +61,7 @@ function extractSteamId(input: string): string | null {
 // Получение Faceit player_id по Steam ID
 async function getPlayerIdBySteamId(steamId: string): Promise<string | null> {
     try {
-        const response = await axios.get(
+        const response = await axiosInstance.get(
         `${FACEIT_API_BASE}/players?game=cs2&game_player_id=${steamId}`,
         {
             headers: getApiHeaders(),
@@ -72,10 +80,10 @@ async function getPlayerIdBySteamId(steamId: string): Promise<string | null> {
 async function getPlayerStats(playerId: string, matchesLimit?: number) {
     const headers = getApiHeaders()
     const [playerInfo, playerStats] = await Promise.all([
-        axios.get(`${FACEIT_API_BASE}/players/${playerId}`, {
+        axiosInstance.get(`${FACEIT_API_BASE}/players/${playerId}`, {
         headers,
         }),
-        axios.get(`${FACEIT_API_BASE}/players/${playerId}/stats/cs2`, {
+        axiosInstance.get(`${FACEIT_API_BASE}/players/${playerId}/stats/cs2`, {
         headers,
         }),
     ])
@@ -85,7 +93,7 @@ async function getPlayerStats(playerId: string, matchesLimit?: number) {
     if (matchesLimit) {
         try {
             // Используем правильный endpoint для получения статистики по матчам
-            const statsResponse = await axios.get(
+            const statsResponse = await axiosInstance.get(
                 `${FACEIT_API_BASE}/players/${playerId}/games/cs2/stats?limit=${matchesLimit}`,
                 { headers }
             )
@@ -94,7 +102,7 @@ async function getPlayerStats(playerId: string, matchesLimit?: number) {
             console.error('Failed to fetch recent matches stats:', error)
             // Fallback на старый endpoint если новый не работает
             try {
-                const matchesResponse = await axios.get(
+                const matchesResponse = await axiosInstance.get(
                     `${FACEIT_API_BASE}/players/${playerId}/history?game=cs2&limit=${matchesLimit}`,
                     { headers }
                 )
@@ -157,7 +165,7 @@ export async function POST(request: NextRequest) {
         } else {
         // Предполагаем, что это никнейм Faceit
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
             `${FACEIT_API_BASE}/players?nickname=${encodeURIComponent(input)}`,
             {
                 headers: getApiHeaders(),

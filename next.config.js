@@ -35,6 +35,16 @@ const nextConfig = {
     optimizeCss: true,
   },
 
+  // Оптимизация для production
+  productionBrowserSourceMaps: false,
+  
+  // Оптимизация компиляции
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
   // Заголовки для кеширования и безопасности
   async headers() {
     return [
