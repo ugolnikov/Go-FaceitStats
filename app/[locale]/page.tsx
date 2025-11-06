@@ -1,20 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import SearchInput from '@/components/SearchInput'
 import LanguageSelector from '@/components/LanguageSelector'
 import StructuredData from '@/components/StructuredData'
-import { useLanguage } from '@/contexts/LanguageContext'
 import { addToHistory, getSearchHistory, clearHistory, SearchHistoryItem } from '@/lib/storage'
 
 export default function Home() {
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
+  const t = useTranslations()
+  
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [history, setHistory] = useState<SearchHistoryItem[]>([])
-  const { t } = useLanguage()
 
   useEffect(() => {
     // Загружаем историю только на клиенте
@@ -27,7 +31,7 @@ export default function Home() {
     if (e && typeof e === 'object' && typeof e.preventDefault === 'function') e.preventDefault();
     const valueToSearch = actualSearchValue || input 
     if (!valueToSearch.trim()) {
-      setError(t.error)
+      setError(t('error'))
       return
     }
 
@@ -47,7 +51,7 @@ export default function Home() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || t.error)
+        throw new Error(data.error || t('error'))
       }
 
       // Сохраняем в историю
@@ -57,10 +61,10 @@ export default function Home() {
       // Создаем slug из никнейма или input
       const slug = data.player?.nickname || encodeURIComponent(valueToSearch.trim())
       
-      // Перенаправляем на страницу игрока
+      // Перенаправляем на страницу игрока с учетом локали
       router.push(`/player/${slug}`)
     } catch (err: any) {
-      setError(err.message || t.error)
+      setError(err.message || t('error'))
       setLoading(false)
     }
   }
@@ -75,34 +79,10 @@ export default function Home() {
     setTimeout(() => handleSubmit(), 100)
   }
 
-  // Определяем URL автоматически на клиенте
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  
-  // const structuredData = {
-  //   '@context': 'https://schema.org',
-  //   '@type': 'WebApplication',
-  //   name: 'Faceit CS2 Stats',
-  //   description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке. ELO, K/D, ADR, винрейт и многое другое.',
-  //   ...(baseUrl && { url: baseUrl }),
-  //   applicationCategory: 'GameApplication',
-  //   operatingSystem: 'Web',
-  //   offers: {
-  //     '@type': 'Offer',
-  //     price: '0',
-  //     priceCurrency: 'USD',
-  //   },
-  //   aggregateRating: {
-  //     '@type': 'AggregateRating',
-  //     ratingValue: '4.5',
-  //     ratingCount: '100',
-  //   },
-  // }
-
   return (
     <div className="container">
-      {/* <StructuredData data={structuredData} /> */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
-        <h1 className="title" style={{ margin: 0, textAlign: 'center' }}>{t.title}</h1>
+        <h1 className="title" style={{ margin: 0, textAlign: 'center' }}>{t('title')}</h1>
         <div style={{ position: 'absolute', right: 0 }}>
           <LanguageSelector />
         </div>
@@ -111,7 +91,7 @@ export default function Home() {
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="input">{t.inputLabel}</label>
+            <label htmlFor="input">{t('inputLabel')}</label>
             <SearchInput
               value={input}
               onChange={setInput}
@@ -120,19 +100,19 @@ export default function Home() {
             />
           </div>
           <button type="submit" className="btn" disabled={loading}>
-            {loading ? t.loading : t.getStats}
+            {loading ? t('loading') : t('getStats')}
           </button>
         </form>
 
         {error && <div className="error">{error}</div>}
       </div>
 
-      {loading && <div className="loading">{t.loadingStats}</div>}
+      {loading && <div className="loading">{t('loadingStats')}</div>}
 
       {history.length > 0 && (
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ color: '#ffffff', fontSize: '1.2rem' }}>{t.history}</h3>
+            <h3 style={{ color: '#ffffff', fontSize: '1.2rem' }}>{t('history')}</h3>
             <button
               onClick={handleClearHistory}
               style={{
@@ -154,7 +134,7 @@ export default function Home() {
                 e.currentTarget.style.borderColor = '#333'
               }}
             >
-              {t.clearHistory}
+              {t('clearHistory')}
             </button>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>

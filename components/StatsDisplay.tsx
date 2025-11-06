@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useTranslations } from 'next-intl'
 import StatIndicator from './StatIndicator'
 import { formatStatValue } from '@/lib/statsThresholds'
 
@@ -64,7 +64,7 @@ interface StatsDisplayProps {
 }
 
 export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit }: StatsDisplayProps) {
-  const { t } = useLanguage()
+  const t = useTranslations()
   const [expandedMaps, setExpandedMaps] = useState<Set<string>>(new Set())
   const cs2Stats = stats.games?.cs2
   const lifetime = stats.lifetime || {}
@@ -279,22 +279,22 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
       {cs2Stats && (
         <div style={{ marginBottom: '2rem' }}>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ffffff' }}>
-            {t.cs2Stats}
+            {t('cs2Stats')}
           </h3>
           <div className="stats-grid">
             <div className="stat-card">
-              <h3>{t.elo}</h3>
+              <h3>{t('elo')}</h3>
               <div className="value">
                 <span>{cs2Stats.faceit_elo || 'N/A'}</span>
                 {cs2Stats.faceit_elo && <StatIndicator value={cs2Stats.faceit_elo} type="elo" />}
               </div>
             </div>
             <div className="stat-card">
-              <h3>{t.level}</h3>
+              <h3>{t('level')}</h3>
               <div className="value">{cs2Stats.skill_level || 'N/A'}</div>
             </div>
             <div className="stat-card">
-              <h3>{t.region}</h3>
+              <h3>{t('region')}</h3>
               <div className="value">{cs2Stats.region || 'N/A'}</div>
             </div>
           </div>
@@ -305,7 +305,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ fontSize: '1.5rem', color: '#ffffff', margin: 0 }}>
-              {t.recentMatches} ({recentStats.matches})
+              {t('recentMatches')} ({recentStats.matches})
             </h3>
             {setMatchesLimit && (
               <select
@@ -321,55 +321,55 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
                   cursor: 'pointer',
                 }}
               >
-                <option value={10}>{t.matches10}</option>
-                <option value={20}>{t.matches20}</option>
-                <option value={30}>{t.matches30}</option>
+                <option value={10}>{t('matches10')}</option>
+                <option value={20}>{t('matches20')}</option>
+                <option value={30}>{t('matches30')}</option>
               </select>
             )}
           </div>
           <div className="stats-grid">
             <div className="stat-card">
-              <h3>{t.matches}</h3>
+              <h3>{t('matches')}</h3>
               <div className="value">{recentStats.matches}</div>
             </div>
             <div className="stat-card">
-              <h3>{t.wins}</h3>
+              <h3>{t('wins')}</h3>
               <div className="value">{recentStats.wins}</div>
             </div>
             <div className="stat-card">
-              <h3>{t.winRate}</h3>
+              <h3>{t('winRate')}</h3>
               <div className="value">
                 <span>{recentStats.winRate}%</span>
                 <StatIndicator value={parseFloat(recentStats.winRate)} type="winRate" />
               </div>
             </div>
             <div className="stat-card">
-              <h3>{t.kd}</h3>
+              <h3>{t('kd')}</h3>
               <div className="value">
                 <span>{recentStats.kd}</span>
                 <StatIndicator value={parseFloat(recentStats.kd)} type="kd" />
               </div>
             </div>
             <div className="stat-card">
-              <h3>{t.headshots}</h3>
+              <h3>{t('headshots')}</h3>
               <div className="value">
                 <span>{recentStats.headshot}%</span>
                 <StatIndicator value={parseFloat(recentStats.headshot)} type="headshot" />
               </div>
             </div>
             <div className="stat-card">
-              <h3>{t.adr}</h3>
+              <h3>{t('adr')}</h3>
               <div className="value">
                 <span>{recentStats.adr}</span>
                 <StatIndicator value={parseFloat(recentStats.adr)} type="adr" />
               </div>
             </div>
             <div className="stat-card">
-              <h3>{t.avgKills}</h3>
+              <h3>{t('avgKills')}</h3>
               <div className="value">{recentStats.avgKills}</div>
             </div>
             <div className="stat-card">
-              <h3>{t.avgDeaths}</h3>
+              <h3>{t('avgDeaths')}</h3>
               <div className="value">{recentStats.avgDeaths}</div>
             </div>
           </div>
@@ -379,24 +379,24 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
       {Object.keys(lifetime).length > 0 && (
         <div>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ffffff' }}>
-            {t.generalStats}
+            {t('generalStats')}
           </h3>
           <div className="stats-grid">
             {lifetime['Matches'] && (
               <div className="stat-card">
-                <h3>{t.matches}</h3>
+                <h3>{t('matches')}</h3>
                 <div className="value">{lifetime['Matches']}</div>
               </div>
             )}
             {lifetime['Wins'] && (
               <div className="stat-card">
-                <h3>{t.wins}</h3>
+                <h3>{t('wins')}</h3>
                 <div className="value">{lifetime['Wins']}</div>
               </div>
             )}
             {lifetime['Win Rate %'] && (
               <div className="stat-card">
-                <h3>{t.winRate}</h3>
+                <h3>{t('winRate')}</h3>
                 <div className="value">
                   <span>{lifetime['Win Rate %']}%</span>
                   <StatIndicator value={formatStatValue(lifetime['Win Rate %'])} type="winRate" />
@@ -405,7 +405,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
             )}
             {lifetime['Average K/D Ratio'] && (
               <div className="stat-card">
-                <h3>{t.kd}</h3>
+                <h3>{t('kd')}</h3>
                 <div className="value">
                   <span>{lifetime['Average K/D Ratio']}</span>
                   <StatIndicator value={formatStatValue(lifetime['Average K/D Ratio'])} type="kd" />
@@ -414,7 +414,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
             )}
             {lifetime['Average Headshots %'] && (
               <div className="stat-card">
-                <h3>{t.headshots}</h3>
+                <h3>{t('headshots')}</h3>
                 <div className="value">
                   <span>{lifetime['Average Headshots %']}%</span>
                   <StatIndicator value={formatStatValue(lifetime['Average Headshots %'])} type="headshot" />
@@ -423,7 +423,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
             )}
             {finalAdr && (
               <div className="stat-card">
-                <h3>{t.adr}</h3>
+                <h3>{t('adr')}</h3>
                 <div className="value">
                   <span>{finalAdr}</span>
                   <StatIndicator 
@@ -440,7 +440,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
       {mapSegments.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ffffff' }}>
-            {t.additionalStats}
+            {t('additionalStats')}
           </h3>
           {mapSegments.map((segment, index) => {
             const isExpanded = expandedMaps.has(segment.label)

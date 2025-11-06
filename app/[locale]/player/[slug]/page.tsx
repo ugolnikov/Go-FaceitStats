@@ -1,19 +1,21 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import StatsDisplay from '@/components/StatsDisplay'
 import LanguageSelector from '@/components/LanguageSelector'
 import SearchInput from '@/components/SearchInput'
 import StructuredData from '@/components/StructuredData'
-import { useLanguage } from '@/contexts/LanguageContext'
 import { addToHistory, getSearchHistory } from '@/lib/storage'
 
 export default function PlayerPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
-  const { t } = useLanguage()
+  const locale = params.locale as string
+  const t = useTranslations()
   
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<any>(null)
@@ -45,12 +47,12 @@ export default function PlayerPage() {
         const data = await response.json()
 
         if (!response.ok) {
-          throw new Error(data.error || t.error)
+          throw new Error(data.error || t('error'))
         }
 
         setStats(data)
       } catch (err: any) {
-        setError(err.message || t.error)
+        setError(err.message || t('error'))
       } finally {
         setLoading(false)
       }
@@ -67,7 +69,7 @@ export default function PlayerPage() {
   const handleSearchSubmit = async (searchValue?: string) => {
     const valueToSearch = searchValue || searchInput
     if (!valueToSearch.trim()) {
-      setSearchError(t.error)
+      setSearchError(t('error'))
       return
     }
 
@@ -86,7 +88,7 @@ export default function PlayerPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || t.error)
+        throw new Error(data.error || t('error'))
       }
 
       // Сохраняем в историю
@@ -95,10 +97,10 @@ export default function PlayerPage() {
       // Создаем slug из никнейма или input
       const newSlug = data.player?.nickname || encodeURIComponent(valueToSearch.trim())
       
-      // Перенаправляем на страницу игрока
+      // Перенаправляем на страницу игрока с учетом локали
       router.push(`/player/${newSlug}`)
     } catch (err: any) {
-      setSearchError(err.message || t.error)
+      setSearchError(err.message || t('error'))
       setSearchLoading(false)
     }
   }
@@ -112,7 +114,7 @@ export default function PlayerPage() {
     '@type': 'Person',
     name: stats.player.nickname,
     description: `Статистика игрока ${stats.player.nickname} на Faceit CS2`,
-    ...(baseUrl && { url: `${baseUrl}/player/${slug}` }),
+    ...(baseUrl && { url: `${baseUrl}/${locale}/player/${slug}` }),
     image: stats.player.avatar,
     sameAs: [
       stats.player.faceit_url,
@@ -131,7 +133,7 @@ export default function PlayerPage() {
     <div className="container">
       {structuredData && <StructuredData data={structuredData} />}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
-        <h1 className="title" style={{ margin: 0, textAlign: 'center' }}>{t.title}</h1>
+        <h1 className="title" style={{ margin: 0, textAlign: 'center' }}>{t('title')}</h1>
         <div style={{ position: 'absolute', right: 0 }}>
           <LanguageSelector />
         </div>
@@ -139,7 +141,7 @@ export default function PlayerPage() {
 
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push(`/${locale}`)}
           style={{
             background: '#1a1a1a',
             border: '1px solid #333',
@@ -161,7 +163,7 @@ export default function PlayerPage() {
             e.currentTarget.style.borderColor = '#333'
           }}
         >
-          ← {t.back || 'Назад'}
+          ← {t('back')}
         </button>
         
         <div style={{ flex: 1, maxWidth: '400px' }}>
@@ -181,7 +183,7 @@ export default function PlayerPage() {
         </div>
       </div>
 
-      {loading && <div className="loading">{t.loadingStats}</div>}
+      {loading && <div className="loading">{t('loadingStats')}</div>}
 
       {error && (
         <div className="card">

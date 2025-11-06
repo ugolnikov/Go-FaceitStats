@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string; locale: string }>
 }): Promise<Metadata> {
   const { slug } = await params
   const decodedSlug = decodeURIComponent(slug)

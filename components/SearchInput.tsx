@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useTranslations } from 'next-intl'
 import { getSearchHistory, SearchHistoryItem } from '@/lib/storage'
 
 interface SearchInputProps {
@@ -12,7 +12,7 @@ interface SearchInputProps {
 }
 
 export default function SearchInput({ value, onChange, onSubmit, disabled }: SearchInputProps) {
-  const { t } = useLanguage()
+  const t = useTranslations()
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [suggestions, setSuggestions] = useState<SearchHistoryItem[]>([])
   const [isFocused, setIsFocused] = useState(false)
@@ -94,7 +94,7 @@ export default function SearchInput({ value, onChange, onSubmit, disabled }: Sea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={t.inputPlaceholder}
+        placeholder={t('inputPlaceholder')}
         disabled={disabled}
         style={{
           width: '100%',

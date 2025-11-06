@@ -1,7 +1,7 @@
 'use client'
 
 import { SearchHistoryItem } from '@/lib/storage'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useTranslations } from 'next-intl'
 
 interface HistorySidebarProps {
   history: SearchHistoryItem[]
@@ -10,7 +10,7 @@ interface HistorySidebarProps {
 }
 
 export default function HistorySidebar({ history, onSelect, onClear }: HistorySidebarProps) {
-  const { t } = useLanguage()
+  const t = useTranslations()
 
   if (history.length === 0) return null
 
@@ -33,7 +33,7 @@ export default function HistorySidebar({ history, onSelect, onClear }: HistorySi
     >
       <div style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ color: '#ffffff', fontSize: '1.1rem', fontWeight: 600 }}>{t.history}</h3>
+          <h3 style={{ color: '#ffffff', fontSize: '1.1rem', fontWeight: 600 }}>{t('history')}</h3>
           <button
             onClick={onClear}
             style={{

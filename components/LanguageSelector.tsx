@@ -1,16 +1,31 @@
 'use client'
 
-import { useLanguage } from '@/contexts/LanguageContext'
-import { languages } from '@/lib/translations'
+import { usePathname, useRouter } from '@/i18n/navigation'
+import { useLocale } from 'next-intl'
+
+const languages = [
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+]
 
 export default function LanguageSelector() {
-  const { language, setLanguage, t } = useLanguage()
+  const locale = useLocale()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const handleLanguageChange = (newLocale: string) => {
+    // Используем next-intl navigation API для правильной смены локали
+    router.replace(pathname, {locale: newLocale})
+  }
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <select
-        value={language}
-        onChange={(e) => setLanguage(e.target.value as any)}
+        value={locale}
+        onChange={(e) => handleLanguageChange(e.target.value)}
         style={{
           background: '#1a1a1a',
           color: '#ffffff',
@@ -35,4 +50,3 @@ export default function LanguageSelector() {
     </div>
   )
 }
-
