@@ -78,29 +78,29 @@ export default function Home() {
   // Определяем URL автоматически на клиенте
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'Faceit CS2 Stats',
-    description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке. ELO, K/D, ADR, винрейт и многое другое.',
-    ...(baseUrl && { url: baseUrl }),
-    applicationCategory: 'GameApplication',
-    operatingSystem: 'Web',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.5',
-      ratingCount: '100',
-    },
-  }
+  // const structuredData = {
+  //   '@context': 'https://schema.org',
+  //   '@type': 'WebApplication',
+  //   name: 'Faceit CS2 Stats',
+  //   description: 'Получайте детальную статистику игроков Faceit CS2 по никнейму или Steam ссылке. ELO, K/D, ADR, винрейт и многое другое.',
+  //   ...(baseUrl && { url: baseUrl }),
+  //   applicationCategory: 'GameApplication',
+  //   operatingSystem: 'Web',
+  //   offers: {
+  //     '@type': 'Offer',
+  //     price: '0',
+  //     priceCurrency: 'USD',
+  //   },
+  //   aggregateRating: {
+  //     '@type': 'AggregateRating',
+  //     ratingValue: '4.5',
+  //     ratingCount: '100',
+  //   },
+  // }
 
   return (
     <div className="container">
-      <StructuredData data={structuredData} />
+      {/* <StructuredData data={structuredData} /> */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
         <h1 className="title" style={{ margin: 0, textAlign: 'center' }}>{t.title}</h1>
         <div style={{ position: 'absolute', right: 0 }}>
