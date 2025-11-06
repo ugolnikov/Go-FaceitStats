@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import favicon from './src/favicon.ico'
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 // Автоматическое определение базового URL
 function getBaseUrl(): string {
@@ -81,15 +83,14 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <link rel="icon" href={favicon.src} />
-        <link rel="preconnect" href="https://open.faceit.com" />
-        <link rel="dns-prefetch" href="https://open.faceit.com" />
-        <link rel="preconnect" href="https://faceit-cdn.net" />
-        <link rel="dns-prefetch" href="https://faceit-cdn.net" />
       </head>
       <body>
         <LanguageProvider>{children}</LanguageProvider>
+        <SpeedInsights/>
+        <Analytics/>
       </body>
     </html>
+    
   )
 }
 
