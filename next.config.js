@@ -31,9 +31,10 @@ const nextConfig = {
   poweredByHeader: false,
   
   // Экспериментальные функции для производительности
-  experimental: {
-    optimizeCss: true,
-  },
+  // optimizeCss может вызывать проблемы с загрузкой ресурсов
+  // experimental: {
+  //   optimizeCss: true,
+  // },
 
   // Оптимизация для production
   productionBrowserSourceMaps: false,

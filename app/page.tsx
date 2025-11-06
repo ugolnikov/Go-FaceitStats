@@ -1,14 +1,12 @@
 'use client'
 
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import SearchInput from '@/components/SearchInput'
 import LanguageSelector from '@/components/LanguageSelector'
 import StructuredData from '@/components/StructuredData'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { addToHistory, getSearchHistory, clearHistory, SearchHistoryItem } from '@/lib/storage'
-
-// Динамический импорт для оптимизации загрузки
-const SearchInput = lazy(() => import('@/components/SearchInput'))
 
 export default function Home() {
   const router = useRouter()
@@ -114,14 +112,12 @@ export default function Home() {
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="input">{t.inputLabel}</label>
-            <Suspense fallback={<div style={{ padding: '1rem', color: '#ffffff' }}>Loading...</div>}>
-              <SearchInput
-                value={input}
-                onChange={setInput}
-                onSubmit={handleSubmit}
-                disabled={loading}
-              />
-            </Suspense>
+            <SearchInput
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              disabled={loading}
+            />
           </div>
           <button type="submit" className="btn" disabled={loading}>
             {loading ? t.loading : t.getStats}

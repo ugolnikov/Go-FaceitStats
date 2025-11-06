@@ -1,15 +1,13 @@
 'use client'
 
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import StatsDisplay from '@/components/StatsDisplay'
 import LanguageSelector from '@/components/LanguageSelector'
 import SearchInput from '@/components/SearchInput'
 import StructuredData from '@/components/StructuredData'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { addToHistory, getSearchHistory } from '@/lib/storage'
-
-// Динамический импорт для оптимизации загрузки
-const StatsDisplay = lazy(() => import('@/components/StatsDisplay'))
 
 export default function PlayerPage() {
   const params = useParams()
@@ -192,13 +190,11 @@ export default function PlayerPage() {
       )}
 
       {stats && (
-        <Suspense fallback={<div className="loading">{t.loadingStats}</div>}>
-          <StatsDisplay 
-            stats={stats} 
-            matchesLimit={matchesLimit} 
-            setMatchesLimit={handleMatchesLimitChange}
-          />
-        </Suspense>
+        <StatsDisplay 
+          stats={stats} 
+          matchesLimit={matchesLimit} 
+          setMatchesLimit={handleMatchesLimitChange}
+        />
       )}
     </div>
   )

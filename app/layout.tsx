@@ -3,7 +3,23 @@ import './globals.css'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import favicon from './src/favicon.ico'
 
+// Автоматическое определение базового URL
+function getBaseUrl(): string {
+  // В production на Vercel используем автоматическое определение
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  // Для локальной разработки
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000'
+  }
+  // Fallback для production - Next.js автоматически определит из заголовков запроса
+  // Но metadataBase требует URL, поэтому используем placeholder
+  return 'https://faceit-stats.vercel.app'
+}
+
 export const metadata: Metadata = {
+  metadataBase: new URL(getBaseUrl()),
   title: {
     default: 'Faceit CS2 Stats - Статистика игроков Faceit',
     template: '%s | Faceit CS2 Stats'
