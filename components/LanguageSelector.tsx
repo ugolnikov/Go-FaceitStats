@@ -39,6 +39,7 @@ export default function LanguageSelector() {
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'right 0.75rem center',
           paddingRight: '2.5rem',
+          minWidth: '120px',
         }}
       >
         {languages.map((lang) => (

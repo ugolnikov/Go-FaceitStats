@@ -214,11 +214,12 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
         display: 'flex',
         textAlign: 'center',
         marginBottom: '2rem',
-        flexWrap: 'nowrap',
+        flexWrap: 'wrap',
         flexDirection: 'row',
         alignContent: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        gap: '1rem'
       }}>
         {stats.player.avatar && (
           <a target="_blank"
@@ -232,6 +233,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
                 borderRadius: '50%',
                 marginBottom: '1rem',
                 objectFit: 'cover',
+                flexShrink: 0,
               }}
               loading="lazy"
               unoptimized={!stats.player.avatar.includes('faceit-cdn')}
@@ -246,12 +248,30 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
               rel="noopener noreferrer"
               title="Faceit profile"
               className="hover:text-underline"
-              style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#ffffff' }}
+              style={{ 
+                fontSize: '2rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '0.5rem', 
+                color: '#ffffff',
+                wordBreak: 'break-word',
+                textAlign: 'center'
+              }}
             >
               {stats.player.nickname}
             </a>
           ) : 
-            <h2 style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#ffffff' }}>
+            <h2 style={{ 
+              fontSize: '2rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '0.5rem', 
+              color: '#ffffff',
+              wordBreak: 'break-word',
+              textAlign: 'center'
+            }}>
               {stats.player.nickname}
             </h2>
           }
@@ -278,7 +298,12 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
 
       {cs2Stats && (
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ffffff' }}>
+          <h3 style={{ 
+            fontSize: '1.5rem', 
+            marginBottom: '1rem', 
+            color: '#ffffff',
+            wordBreak: 'break-word'
+          }}>
             {t('cs2Stats')}
           </h3>
           <div className="stats-grid">
@@ -303,8 +328,21 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
 
       {recentStats && (
         <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '1.5rem', color: '#ffffff', margin: 0 }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '1rem',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            <h3 style={{ 
+              fontSize: '1.5rem', 
+              color: '#ffffff', 
+              margin: 0,
+              flex: 1,
+              minWidth: '200px'
+            }}>
               {t('recentMatches')} ({recentStats.matches})
             </h3>
             {setMatchesLimit && (
@@ -319,6 +357,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
                   padding: '0.5rem 1rem',
                   fontSize: '0.9rem',
                   cursor: 'pointer',
+                  flexShrink: 0
                 }}
               >
                 <option value={10}>{t('matches10')}</option>
@@ -378,7 +417,12 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
 
       {Object.keys(lifetime).length > 0 && (
         <div>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ffffff' }}>
+          <h3 style={{ 
+            fontSize: '1.5rem', 
+            marginBottom: '1rem', 
+            color: '#ffffff',
+            wordBreak: 'break-word'
+          }}>
             {t('generalStats')}
           </h3>
           <div className="stats-grid">
@@ -439,7 +483,12 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
 
       {mapSegments.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ffffff' }}>
+          <h3 style={{ 
+            fontSize: '1.5rem', 
+            marginBottom: '1rem', 
+            color: '#ffffff',
+            wordBreak: 'break-word'
+          }}>
             {t('additionalStats')}
           </h3>
           {mapSegments.map((segment, index) => {
@@ -485,7 +534,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
                       border: '1px solid #333',
                       borderRadius: '8px',
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                       gap: '1rem',
                     }}
                   >
@@ -521,7 +570,7 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                   gap: '1rem',
                 }}
               >

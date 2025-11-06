@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* @import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Notch:wght@200..700&display=swap'); */
 
 @layer base {
   :root {
@@ -67,6 +68,12 @@ a {
   padding: 2rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
 .card {
   background: #0a0a0a;
   border: 1px solid #1a1a1a;
@@ -75,6 +82,14 @@ a {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   margin-bottom: 2rem;
   color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .input-group {
@@ -99,6 +114,13 @@ a {
   transition: border-color 0.3s;
 }
 
+@media (max-width: 768px) {
+  .input-group input {
+    font-size: 16px; /* Предотвращает зум на iOS */
+    padding: 0.875rem;
+  }
+}
+
 .input-group input:focus {
   outline: none;
   border-color: #ffffff;
@@ -118,6 +140,14 @@ a {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
 }
 
 .btn:hover {
@@ -143,6 +173,14 @@ a {
   margin-top: 2rem;
 }
 
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+}
+
 .stat-card {
   background: #1a1a1a;
   border: 1px solid #333333;
@@ -150,6 +188,18 @@ a {
   padding: 1.5rem;
   border-radius: 8px;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .stat-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    padding: 1rem;
+  }
 }
 
 .stat-card h3 {
@@ -166,6 +216,18 @@ a {
   text-align: center;
   width: 100%;
   position: relative;
+}
+
+@media (max-width: 768px) {
+  .stat-card .value {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card .value {
+    font-size: 1.5rem;
+  }
 }
 
 .stat-card .value > * {
@@ -205,6 +267,22 @@ a {
   font-size: 2.5rem;
   font-weight: 450;
   width: 100%;
+  font-family: Stack Sans Notch;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0 140px 0 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+    padding: 0 120px 0 0 !important;
+  }
 }
 
 .subtitle {

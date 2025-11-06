@@ -2,21 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useRouter } from '@/i18n/navigation'
+import { useRouter, usePathname, Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import StatsDisplay from '@/components/StatsDisplay'
 import LanguageSelector from '@/components/LanguageSelector'
 import SearchInput from '@/components/SearchInput'
 import StructuredData from '@/components/StructuredData'
-import { addToHistory, getSearchHistory } from '@/lib/storage'
+import { addToHistory } from '@/lib/storage'
+
 
 export default function PlayerPage() {
   const params = useParams()
   const router = useRouter()
+  const pathname = usePathname()
   const slug = params.slug as string
   const locale = params.locale as string
   const t = useTranslations()
-  
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
@@ -47,11 +48,25 @@ export default function PlayerPage() {
         const data = await response.json()
 
         if (!response.ok) {
-          throw new Error(data.error || t('error'))
+          const errorMessage = data.error || t('error')
+          console.error('API Error (Fetch Stats):', {
+            status: response.status,
+            statusText: response.statusText,
+            error: data.error,
+            data: data,
+            slug: decodedSlug
+          })
+          throw new Error(errorMessage)
         }
 
         setStats(data)
       } catch (err: any) {
+        console.error('Fetch Stats Error:', {
+          message: err.message,
+          error: err,
+          slug: slug,
+          stack: err.stack
+        })
         setError(err.message || t('error'))
       } finally {
         setLoading(false)
@@ -88,10 +103,17 @@ export default function PlayerPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || t('error'))
+        const errorMessage = data.error || t('error')
+        console.error('API Error (Player Page):', {
+          status: response.status,
+          statusText: response.statusText,
+          error: data.error,
+          data: data
+        })
+        throw new Error(errorMessage)
       }
 
-      // Сохраняем в историю
+      // Сохраняем в историю для автокомплита
       addToHistory(valueToSearch.trim(), data.player?.nickname, data.player?.steam_id_64)
       
       // Создаем slug из никнейма или input
@@ -100,6 +122,12 @@ export default function PlayerPage() {
       // Перенаправляем на страницу игрока с учетом локали
       router.push(`/player/${newSlug}`)
     } catch (err: any) {
+      console.error('Search Error (Player Page):', {
+        message: err.message,
+        error: err,
+        input: valueToSearch,
+        stack: err.stack
+      })
       setSearchError(err.message || t('error'))
       setSearchLoading(false)
     }
@@ -132,16 +160,38 @@ export default function PlayerPage() {
   return (
     <div className="container">
       {structuredData && <StructuredData data={structuredData} />}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
-        <h1 className="title" style={{ margin: 0, textAlign: 'center' }}>{t('title')}</h1>
-        <div style={{ position: 'absolute', right: 0 }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginBottom: '2rem', 
+        position: 'relative',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        width: '100%'
+      }}>
+        <h1 className="title" style={{ margin: 0, textAlign: 'center', flex: 1, minWidth: '200px', paddingRight: '140px' }}>{t('title')}</h1>
+        <div style={{ 
+          position: 'absolute', 
+          right: 0,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 10
+        }}>
           <LanguageSelector />
         </div>
       </div>
 
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-        <button
-          onClick={() => router.push(`/${locale}`)}
+      <div style={{ 
+        marginBottom: '1rem', 
+        display: 'flex', 
+        gap: '1rem', 
+        alignItems: 'flex-start',
+        flexDirection: 'row',
+        flexWrap: 'wrap'
+      }}>
+        <Link
+          href="/"
           style={{
             background: '#1a1a1a',
             border: '1px solid #333',
@@ -152,7 +202,12 @@ export default function PlayerPage() {
             fontSize: '0.9rem',
             transition: 'all 0.2s',
             whiteSpace: 'nowrap',
-            height: '-webkit-fill-available'
+            textDecoration: 'none',
+            // display: 'inline-block',
+            flexShrink: 0,
+            height: '-webkit-fill-available',
+            display: 'flex',
+            alignItems: 'center',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = '#2a2a2a'
@@ -164,9 +219,9 @@ export default function PlayerPage() {
           }}
         >
           ← {t('back')}
-        </button>
+        </Link>
         
-        <div style={{ flex: 1, maxWidth: '400px' }}>
+        <div style={{ flex: 1, minWidth: '200px', maxWidth: '100%' }}>
           <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); }}>
             <SearchInput
               value={searchInput}

@@ -8,6 +8,10 @@ export const routing = defineRouting({
   defaultLocale: 'en',
   
   // Дефолтный язык без префикса, остальные с префиксом
-  localePrefix: 'as-needed'
+  localePrefix: 'as-needed',
+  
+  // Автоопределение языка из заголовка Accept-Language браузера
+  // По умолчанию включено, но явно указываем для ясности
+  localeDetection: true
 });
 

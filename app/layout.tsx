@@ -1,7 +1,7 @@
 import {NextIntlClientProvider} from 'next-intl';
 import type { Metadata } from 'next'
 import './globals.css'
-import favicon from './src/favicon.ico'
+import favicon from './favicon.ico'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/next"
 
