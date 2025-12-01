@@ -118,7 +118,7 @@ export default function Home() {
             />
           </div>
           <button type="submit" className="btn" disabled={loading}>
-            {loading ? t('loading') : t('getStats')}
+            {loading ? t('loading') : t('getStats')} 📷
           </button>
         </form>
 
