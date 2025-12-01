@@ -109,7 +109,7 @@ export default function Home() {
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="input">{t('inputLabel')}</label>
+            <label htmlFor="search-input">{t('inputLabel')}</label>
             <SearchInput
               value={input}
               onChange={setInput}

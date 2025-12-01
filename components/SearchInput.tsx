@@ -90,6 +90,8 @@ export default function SearchInput({ value, onChange, onSubmit, disabled }: Sea
     <div style={{ position: 'relative', width: '100%' }}>
       <input
         ref={inputRef}
+        id="search-input"
+        name="search"
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
