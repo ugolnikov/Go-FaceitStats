@@ -4,12 +4,26 @@ import axios from 'axios'
 const FACEIT_API_BASE = 'https://open.faceit.com/data/v4'
 const STEAM_API_BASE = 'https://api.steampowered.com'
 
+const REQUIRED_ENV_VARS = ['FACEIT_API_KEY', 'STEAM_API_KEY'] as const
+
+function validateEnv() {
+    if (process.env.NODE_ENV === 'production') {
+        for (const key of REQUIRED_ENV_VARS) {
+            if (!process.env[key]) {
+                throw new Error(`Missing required env variable ${key} in production`)
+            }
+        }
+    }
+}
+
+validateEnv()
+
 // Настройка axios с таймаутами для оптимизации
 const axiosInstance = axios.create({
   timeout: 10000, // 10 секунд таймаут
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    headers: {
+        'Content-Type': 'application/json',
+    },
 })
 
 // Получение заголовков для API запросов
@@ -207,7 +221,7 @@ export async function POST(request: NextRequest) {
         playerId = await getPlayerIdBySteamId(steamId)
         if (!playerId) {
             return NextResponse.json(
-                { error: 'Игрок с таким Steam ID не найден в Faceit' },
+                { error: 'Игрок с таким Steam ID не найден в Faceit', code: 'PLAYER_NOT_FOUND' },
                 { status: 404 }
             )
         }
@@ -224,7 +238,7 @@ export async function POST(request: NextRequest) {
         } catch (error: any) {
             if (error.response?.status === 404) {
                 return NextResponse.json(
-                    { error: 'Игрок с таким никнеймом не найден' },
+                    { error: 'Игрок с таким никнеймом не найден', code: 'PLAYER_NOT_FOUND' },
                     { status: 404 }
                 )
             }
@@ -234,7 +248,7 @@ export async function POST(request: NextRequest) {
 
     if (!playerId) {
         return NextResponse.json(
-            { error: 'Игрок не найден' },
+            { error: 'Игрок не найден', code: 'PLAYER_NOT_FOUND' },
             { status: 404 }
         )
         }
@@ -258,7 +272,7 @@ export async function POST(request: NextRequest) {
 
     if (error.response?.status === 404) {
         return NextResponse.json(
-            { error: 'Игрок не найден' },
+            { error: 'Игрок не найден', code: 'PLAYER_NOT_FOUND' },
             { status: 404 }
         )
         }

@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* @import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Notch:wght@200..700&display=swap'); */
+
 
 @layer base {
   :root {
@@ -267,7 +267,6 @@ a {
   font-size: 2.5rem;
   font-weight: 450;
   width: 100%;
-  font-family: Stack Sans Notch;
 }
 
 @media (max-width: 768px) {

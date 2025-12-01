@@ -51,14 +51,29 @@ export default function Home() {
       const data = await response.json()
 
       if (!response.ok) {
-        const errorMessage = data.error || t('error')
         console.error('API Error:', {
           status: response.status,
           statusText: response.statusText,
           error: data.error,
-          data: data
+          code: data.code,
+          data: data,
         })
-        throw new Error(errorMessage)
+
+        let uiMessage = t('error')
+
+        if (response.status === 404 || data.code === 'PLAYER_NOT_FOUND') {
+          uiMessage = t('playerNotFound')
+        } else if (response.status === 401) {
+          uiMessage = 'Ошибка авторизации API. Проверьте FACEIT_API_KEY/STEAM_API_KEY.'
+        } else if (response.status === 429) {
+          uiMessage = 'Превышен лимит запросов к API. Попробуйте позже.'
+        } else if (typeof data.error === 'string') {
+          uiMessage = data.error
+        }
+
+        setError(uiMessage)
+        setLoading(false)
+        return
       }
 
       // Сохраняем в историю для автокомплита
@@ -74,9 +89,9 @@ export default function Home() {
         message: err.message,
         error: err,
         input: valueToSearch,
-        stack: err.stack
+        stack: err.stack,
       })
-      setError(err.message || t('error'))
+      setError(t('error'))
       setLoading(false)
     }
   }
