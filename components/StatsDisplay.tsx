@@ -2,24 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
+import ReactCountryFlag from 'react-country-flag'
 import { useTranslations } from 'next-intl'
 import StatIndicator from './StatIndicator'
 import { formatStatValue } from '@/lib/statsThresholds'
-
-// Функция для генерации флага из кода страны
-const countryCodeToFlag = (countryCode: string | null | undefined): string => {
-  if (!countryCode) {
-    return ''
-  }
-  const code = String(countryCode).toUpperCase()
-  // Вычисление кодовых точек Unicode
-  try {
-    const codePoints = Array.from(code).map(char => 127462 + char.charCodeAt(0) - 65)
-    return String.fromCodePoint(...codePoints)
-  } catch {
-    return ''
-  }
-}
 
 interface StatsDisplayProps {
   stats: {
@@ -175,8 +161,8 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
   // Используем найденный или вычисленный ADR
   const finalAdr = adrValue || computedAdr
   
-  // Генерируем флаг из кода страны
-  const countryFlag = countryCodeToFlag(stats.player.country)
+  // Код страны игрока (например, 'RU') для компонента флага
+  const countryCode = stats.player.country ? String(stats.player.country).toUpperCase() : null
 
   // Фильтруем сегменты - карты отдельно
   const mapSegments = stats.segments?.filter(seg => 
@@ -291,8 +277,12 @@ export default function StatsDisplay({ stats, matchesLimit = 30, setMatchesLimit
           
         </div>
         
-        {countryFlag ? (
-            <span style={{ fontSize: '1.5rem' }}>{countryFlag}</span>
+        {countryCode ? (
+          <ReactCountryFlag
+            countryCode={countryCode}
+            svg
+            style={{ width: '1.5rem', height: '1.5rem', borderRadius: '2px' }}
+          />
         ) : <span></span>}
       </div>
 

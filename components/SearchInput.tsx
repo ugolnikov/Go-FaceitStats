@@ -4,6 +4,34 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { getSearchHistory, SearchHistoryItem } from '@/lib/storage'
 
+function getHistoryDisplayName(item: SearchHistoryItem): string {
+  if (item.playerName && item.playerName.trim()) {
+    return item.playerName
+  }
+
+  const input = item.input || ''
+
+  // Пытаемся вытащить что-то человекопонятное из Steam-ссылки
+  try {
+    const urlString = input.startsWith('http://') || input.startsWith('https://')
+      ? input
+      : `https://${input}`
+    const url = new URL(urlString)
+
+    if (url.hostname === 'steamcommunity.com' || url.hostname.endsWith('.steamcommunity.com')) {
+      const vanityMatch = url.pathname.match(/^\/id\/([^/]+)/)
+      if (vanityMatch) return vanityMatch[1]
+
+      const profileMatch = url.pathname.match(/^\/profiles\/(\d+)/)
+      if (profileMatch) return profileMatch[1]
+    }
+  } catch {
+    // не URL — игнорируем
+  }
+
+  return input
+}
+
 interface SearchInputProps {
   value: string
   onChange: (value: string) => void
@@ -90,6 +118,8 @@ export default function SearchInput({ value, onChange, onSubmit, disabled }: Sea
     <div style={{ position: 'relative', width: '100%' }}>
       <input
         ref={inputRef}
+        id="search-input"
+        name="search"
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -159,10 +189,16 @@ export default function SearchInput({ value, onChange, onSubmit, disabled }: Sea
                 e.currentTarget.style.background = 'transparent'
               }}
             >
-              <div style={{ fontWeight: 500 }}>{item.input}</div>
-              {item.steamId && (
+              {/* первая строка — ник игрока, если есть, иначе что-то человекопонятное */}
+              <div style={{ fontWeight: 500 }}>
+                {getHistoryDisplayName(item)}
+              </div>
+
+              {/* вторая строка — исходный ввод и/или SteamID мелким текстом */}
+              {(item.input || item.steamId) && (
                 <div style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.25rem' }}>
-                  {item.steamId}
+                  {item.input}
+                  {item.steamId && ` \u2022 ${item.steamId}`}
                 </div>
               )}
             </div>

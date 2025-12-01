@@ -2,13 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 
 const FACEIT_API_BASE = 'https://open.faceit.com/data/v4'
+const STEAM_API_BASE = 'https://api.steampowered.com'
+
+const REQUIRED_ENV_VARS = ['FACEIT_API_KEY', 'STEAM_API_KEY'] as const
+
+function validateEnv() {
+    if (process.env.NODE_ENV === 'production') {
+        for (const key of REQUIRED_ENV_VARS) {
+            if (!process.env[key]) {
+                throw new Error(`Missing required env variable ${key} in production`)
+            }
+        }
+    }
+}
+
+validateEnv()
 
 // Настройка axios с таймаутами для оптимизации
 const axiosInstance = axios.create({
   timeout: 10000, // 10 секунд таймаут
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    headers: {
+        'Content-Type': 'application/json',
+    },
 })
 
 // Получение заголовков для API запросов
@@ -22,40 +37,66 @@ function getApiHeaders() {
     }
 }
 
-// Извлечение Steam ID из различных форматов ссылок
+// Извлечение Steam ID из различных форматов ссылок (без учёта vanity URL)
 function extractSteamId(input: string): string | null {
     const trimmedInput = input.trim()
-    
-    // Steam ID64 из прямой строки (если это просто число)
-    if (/^\d{17}$/.test(trimmedInput)) {
-        return trimmedInput
+
+    // Если в строке вообще есть SteamID64 (17 цифр подряд) — забираем его
+    const idMatch = trimmedInput.match(/\b\d{17}\b/)
+    if (idMatch) {
+        return idMatch[0]
     }
 
-    // Пытаемся распарсить как URL
+    // Пытаемся распарсить как URL и достать ID из /profiles/
     try {
-        // Добавляем протокол, если его нет
         const urlString = trimmedInput.startsWith('http://') || trimmedInput.startsWith('https://')
             ? trimmedInput
             : `https://${trimmedInput}`
-        
+
         const url = new URL(urlString)
-        
-        // Проверяем, является ли это Steam профилем
+
         if (url.hostname === 'steamcommunity.com' || url.hostname.endsWith('.steamcommunity.com')) {
-            // Формат: /profiles/76561198012345678
-            const profilesMatch = url.pathname.match(/^\/profiles\/(\d+)$/)
+            const profilesMatch = url.pathname.match(/^\/profiles\/(\d+)/)
             if (profilesMatch) {
                 return profilesMatch[1]
             }
-            
-            // Формат: /id/customname (не поддерживается напрямую, но можем попробовать)
-            // Для этого нужен дополнительный запрос к Steam API
         }
-    } catch (error) {
+    } catch {
         // Не является валидным URL, игнорируем ошибку
     }
 
     return null
+}
+
+// Разрешение vanity URL вида /id/customname в SteamID64
+async function resolveVanityUrlToSteamId(vanity: string): Promise<string | null> {
+    const apiKey = process.env.STEAM_API_KEY
+    if (!apiKey) {
+        console.error('STEAM_API_KEY is not set')
+        return null
+    }
+
+    try {
+        const response = await axiosInstance.get(
+            `${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`,
+            {
+                params: {
+                    key: apiKey,
+                    vanityurl: vanity,
+                },
+            }
+        )
+
+        const data = response.data?.response
+        if (data?.success === 1 && data.steamid) {
+            return data.steamid as string
+        }
+
+        return null
+    } catch (error) {
+        console.error('Failed to resolve Steam vanity URL:', error)
+        return null
+    }
 }
 
 // Получение Faceit player_id по Steam ID
@@ -151,33 +192,55 @@ export async function POST(request: NextRequest) {
 
     let playerId: string | null = null
 
-    // Проверяем, является ли ввод Steam ID/ссылкой
-    const steamId = extractSteamId(input)
+    const trimmedInput = input.trim()
+
+    // 1) Пробуем вытащить SteamID64 из строки (число или /profiles/...)
+    let steamId = extractSteamId(trimmedInput)
+
+    // 2) Если не нашли, но это ссылка вида /id/<vanity>, пробуем спросить Steam API
+    if (!steamId) {
+        try {
+            const urlString = trimmedInput.startsWith('http://') || trimmedInput.startsWith('https://')
+                ? trimmedInput
+                : `https://${trimmedInput}`
+            const url = new URL(urlString)
+
+            if (url.hostname === 'steamcommunity.com' || url.hostname.endsWith('.steamcommunity.com')) {
+                const vanityMatch = url.pathname.match(/^\/id\/([^/]+)/)
+                if (vanityMatch) {
+                    steamId = await resolveVanityUrlToSteamId(vanityMatch[1])
+                }
+            }
+        } catch {
+            // невалидный URL — просто игнорируем, пойдём как по никнейму Faceit
+        }
+    }
+
     if (steamId) {
-      // Пытаемся найти игрока по Steam ID
+        // Пытаемся найти игрока по Steam ID
         playerId = await getPlayerIdBySteamId(steamId)
         if (!playerId) {
             return NextResponse.json(
-            { error: 'Игрок с таким Steam ID не найден в Faceit' },
-            { status: 404 }
+                { error: 'Игрок с таким Steam ID не найден в Faceit', code: 'PLAYER_NOT_FOUND' },
+                { status: 404 }
             )
         }
-        } else {
+    } else {
         // Предполагаем, что это никнейм Faceit
         try {
             const response = await axiosInstance.get(
-            `${FACEIT_API_BASE}/players?nickname=${encodeURIComponent(input)}`,
-            {
-                headers: getApiHeaders(),
-            }
+                `${FACEIT_API_BASE}/players?nickname=${encodeURIComponent(trimmedInput)}`,
+                {
+                    headers: getApiHeaders(),
+                }
             )
             playerId = response.data?.player_id || null
         } catch (error: any) {
             if (error.response?.status === 404) {
-            return NextResponse.json(
-                { error: 'Игрок с таким никнеймом не найден' },
-                { status: 404 }
-            )
+                return NextResponse.json(
+                    { error: 'Игрок с таким никнеймом не найден', code: 'PLAYER_NOT_FOUND' },
+                    { status: 404 }
+                )
             }
             throw error
         }
@@ -185,7 +248,7 @@ export async function POST(request: NextRequest) {
 
     if (!playerId) {
         return NextResponse.json(
-            { error: 'Игрок не найден' },
+            { error: 'Игрок не найден', code: 'PLAYER_NOT_FOUND' },
             { status: 404 }
         )
         }
@@ -209,7 +272,7 @@ export async function POST(request: NextRequest) {
 
     if (error.response?.status === 404) {
         return NextResponse.json(
-            { error: 'Игрок не найден' },
+            { error: 'Игрок не найден', code: 'PLAYER_NOT_FOUND' },
             { status: 404 }
         )
         }
