@@ -72,6 +72,7 @@ export default function LanguageSelector() {
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {currentLanguage.countryCode && (
+            // Новая библа для флагов
             <ReactCountryFlag
               countryCode={currentLanguage.countryCode}
               svg
