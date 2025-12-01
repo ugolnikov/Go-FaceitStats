@@ -5,6 +5,8 @@ import favicon from './favicon.ico'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/next"
 
+
+// Metadata
 export const metadata: Metadata = {
   title: 'Faceit CS2 Stats',
   description: 'Faceit CS2 Statistics',
