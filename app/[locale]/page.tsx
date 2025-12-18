@@ -10,6 +10,7 @@ import StructuredData from '@/components/StructuredData'
 import { addToHistory } from '@/lib/storage'
 
 export default function Home() {
+  setTimeout(() => {}, 3000)
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
