@@ -47,7 +47,7 @@ function extractSteamId(input: string): string | null {
 		return idMatch[0]
 	}
 
-	// Пытаемся распарсить как URL и достать ID из /profiles/
+	// Пытаемся достать как URL и достать ID из /profiles/
 	try {
 		const urlString =
 			trimmedInput.startsWith('http://') || trimmedInput.startsWith('https://')
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
 					}
 				}
 			} catch {
-				// невалидный URL — просто игнорируем, пойдём как по никнейму Faceit
+				// невалидный URL — просто игнорируем, пойдём как по имени пользователя Faceit
 			}
 		}
 
