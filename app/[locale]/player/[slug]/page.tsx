@@ -1,259 +1,295 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { useRouter, usePathname, Link } from '@/i18n/navigation'
-import { useTranslations } from 'next-intl'
-import StatsDisplay from '@/components/StatsDisplay'
 import LanguageSelector from '@/components/LanguageSelector'
 import SearchInput from '@/components/SearchInput'
+import StatsDisplay from '@/components/StatsDisplay'
 import StructuredData from '@/components/StructuredData'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { addToHistory } from '@/lib/storage'
-
+import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function PlayerPage() {
-  const params = useParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const slug = params.slug as string
-  const locale = params.locale as string
-  const t = useTranslations()
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [matchesLimit, setMatchesLimit] = useState<number>(30)
-  const [searchInput, setSearchInput] = useState('')
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [searchError, setSearchError] = useState<string | null>(null)
+	const params = useParams()
+	const router = useRouter()
+	const pathname = usePathname()
+	const slug = params.slug as string
+	const locale = params.locale as string
+	const t = useTranslations()
+	const [loading, setLoading] = useState(true)
+	const [stats, setStats] = useState<any>(null)
+	const [error, setError] = useState<string | null>(null)
+	const [matchesLimit, setMatchesLimit] = useState<number>(30)
+	const [searchInput, setSearchInput] = useState('')
+	const [searchLoading, setSearchLoading] = useState(false)
+	const [searchError, setSearchError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!slug) return
+	useEffect(() => {
+		if (!slug) return
 
-    const fetchStats = async () => {
-      setLoading(true)
-      setError(null)
+		const fetchStats = async () => {
+			setLoading(true)
+			setError(null)
 
-      try {
-        // Декодируем slug (может быть закодированным URL)
-        const decodedSlug = decodeURIComponent(slug)
-        
-        const response = await fetch('/api/faceit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ input: decodedSlug, matchesLimit }),
-        })
+			try {
+				// Декодируем slug (может быть закодированным URL)
+				const decodedSlug = decodeURIComponent(slug)
 
-        const data = await response.json()
+				const response = await fetch('/api/faceit', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ input: decodedSlug, matchesLimit })
+				})
 
-        if (!response.ok) {
-          const errorMessage = data.error || t('error')
-          console.error('API Error (Fetch Stats):', {
-            status: response.status,
-            statusText: response.statusText,
-            error: data.error,
-            data: data,
-            slug: decodedSlug
-          })
-          throw new Error(errorMessage)
-        }
+				const data = await response.json()
 
-        setStats(data)
-      } catch (err: any) {
-        console.error('Fetch Stats Error:', {
-          message: err.message,
-          error: err,
-          slug: slug,
-          stack: err.stack
-        })
-        setError(err.message || t('error'))
-      } finally {
-        setLoading(false)
-      }
-    }
+				if (!response.ok) {
+					const errorMessage = data.error || t('error')
+					console.error('API Error (Fetch Stats):', {
+						status: response.status,
+						statusText: response.statusText,
+						error: data.error,
+						data: data,
+						slug: decodedSlug
+					})
+					throw new Error(errorMessage)
+				}
 
-    fetchStats()
-  }, [slug, matchesLimit, t])
+				setStats(data)
+			} catch (err: any) {
+				console.error('Fetch Stats Error:', {
+					message: err.message,
+					error: err,
+					slug: slug,
+					stack: err.stack
+				})
+				setError(err.message || t('error'))
+			} finally {
+				setLoading(false)
+			}
+		}
 
-  const handleMatchesLimitChange = async (limit: number) => {
-    setMatchesLimit(limit)
-    // Статистика перезагрузится автоматически через useEffect
-  }
+		fetchStats()
+	}, [slug, matchesLimit, t])
 
-  const handleSearchSubmit = async (searchValue?: string) => {
-    const valueToSearch = searchValue || searchInput
-    if (!valueToSearch.trim()) {
-      setSearchError(t('error'))
-      return
-    }
+	const handleMatchesLimitChange = async (limit: number) => {
+		setMatchesLimit(limit)
+		// Статистика перезагрузится автоматически через useEffect
+	}
 
-    setSearchLoading(true)
-    setSearchError(null)
+	const handleSearchSubmit = async (searchValue?: string) => {
+		const valueToSearch = searchValue || searchInput
+		if (!valueToSearch.trim()) {
+			setSearchError(t('error'))
+			return
+		}
 
-    try {
-      const response = await fetch('/api/faceit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ input: valueToSearch.trim(), matchesLimit: 1 }),
-      })
+		setSearchLoading(true)
+		setSearchError(null)
 
-      const data = await response.json()
+		try {
+			const response = await fetch('/api/faceit', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ input: valueToSearch.trim(), matchesLimit: 1 })
+			})
 
-      if (!response.ok) {
-        const errorMessage = data.error || t('error')
-        console.error('API Error (Player Page):', {
-          status: response.status,
-          statusText: response.statusText,
-          error: data.error,
-          data: data
-        })
-        throw new Error(errorMessage)
-      }
+			const data = await response.json()
 
-      // Сохраняем в историю для автокомплита
-      addToHistory(valueToSearch.trim(), data.player?.nickname, data.player?.steam_id_64)
-      
-      // Создаем slug из никнейма или input
-      const newSlug = data.player?.nickname || encodeURIComponent(valueToSearch.trim())
-      
-      // Перенаправляем на страницу игрока с учетом локали
-      router.push(`/player/${newSlug}`)
-    } catch (err: any) {
-      console.error('Search Error (Player Page):', {
-        message: err.message,
-        error: err,
-        input: valueToSearch,
-        stack: err.stack
-      })
-      setSearchError(err.message || t('error'))
-      setSearchLoading(false)
-    }
-  }
+			if (!response.ok) {
+				const errorMessage = data.error || t('error')
+				console.error('API Error (Player Page):', {
+					status: response.status,
+					statusText: response.statusText,
+					error: data.error,
+					data: data
+				})
+				throw new Error(errorMessage)
+			}
 
-  // Определяем URL автоматически на клиенте
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  
-  // Структурированные данные для игрока
-  const structuredData = stats ? {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: stats.player.nickname,
-    description: `Статистика игрока ${stats.player.nickname} на Faceit CS2`,
-    ...(baseUrl && { url: `${baseUrl}/${locale}/player/${slug}` }),
-    image: stats.player.avatar,
-    sameAs: [
-      stats.player.faceit_url,
-      stats.player.steam_id_64 ? `https://steamcommunity.com/profiles/${stats.player.steam_id_64}` : null,
-    ].filter(Boolean),
-    ...(stats.games?.cs2 && {
-      knowsAbout: {
-        '@type': 'Thing',
-        name: 'Counter-Strike 2',
-        description: `ELO: ${stats.games.cs2.faceit_elo}, Уровень: ${stats.games.cs2.skill_level}`,
-      },
-    }),
-  } : null
+			// Сохраняем в историю для автокомплита
+			addToHistory(
+				valueToSearch.trim(),
+				data.player?.nickname,
+				data.player?.steam_id_64
+			)
 
-  return (
-    <div className="container">
-      {structuredData && <StructuredData data={structuredData} />}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        marginBottom: '2rem', 
-        position: 'relative',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        width: '100%'
-      }}>
-        <h1 className="title" style={{ margin: 0, textAlign: 'center', flex: 1, minWidth: '200px', paddingRight: '140px' }}>{t('title')}</h1>
-        <div style={{ 
-          position: 'absolute', 
-          right: 0,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 10
-        }}>
-          <LanguageSelector />
-        </div>
-      </div>
+			// Создаем slug из никнейма или input
+			const newSlug =
+				data.player?.nickname || encodeURIComponent(valueToSearch.trim())
 
-      <div style={{ 
-        marginBottom: '1rem', 
-        display: 'flex', 
-        gap: '1rem', 
-        alignItems: 'flex-start',
-        flexDirection: 'row',
-        flexWrap: 'wrap'
-      }}>
-        <Link
-          href="/"
-          style={{
-            background: '#1a1a1a',
-            border: '1px solid #333',
-            color: '#ffffff',
-            padding: '0.5rem 1rem',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            transition: 'all 0.2s',
-            whiteSpace: 'nowrap',
-            textDecoration: 'none',
-            // display: 'inline-block',
-            flexShrink: 0,
-            height: '-webkit-fill-available',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#2a2a2a'
-            e.currentTarget.style.borderColor = '#ffffff'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#1a1a1a'
-            e.currentTarget.style.borderColor = '#333'
-          }}
-        >
-          ← {t('back')}
-        </Link>
-        
-        <div style={{ flex: 1, minWidth: '200px', maxWidth: '100%' }}>
-          <form onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(); }}>
-            <SearchInput
-              value={searchInput}
-              onChange={setSearchInput}
-              onSubmit={handleSearchSubmit}
-              disabled={searchLoading || loading}
-            />
-            {searchError && (
-              <div style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                {searchError}
-              </div>
-            )}
-          </form>
-        </div>
-      </div>
+			// Перенаправляем на страницу игрока с учетом локали
+			router.push(`/player/${newSlug}`)
+		} catch (err: any) {
+			console.error('Search Error (Player Page):', {
+				message: err.message,
+				error: err,
+				input: valueToSearch,
+				stack: err.stack
+			})
+			setSearchError(err.message || t('error'))
+			setSearchLoading(false)
+		}
+	}
 
-      {loading && <div className="loading">{t('loadingStats')}</div>}
+	// Определяем URL автоматически на клиенте
+	const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
-      {error && (
-        <div className="card">
-          <div className="error">{error}</div>
-        </div>
-      )}
+	// Структурированные данные для игрока
+	const structuredData = stats
+		? {
+				'@context': 'https://schema.org',
+				'@type': 'Person',
+				name: stats.player.nickname,
+				description: `Статистика игрока ${stats.player.nickname} на Faceit CS2`,
+				...(baseUrl && { url: `${baseUrl}/${locale}/player/${slug}` }),
+				image: stats.player.avatar,
+				sameAs: [
+					stats.player.faceit_url,
+					stats.player.steam_id_64
+						? `https://steamcommunity.com/profiles/${stats.player.steam_id_64}`
+						: null
+				].filter(Boolean),
+				...(stats.games?.cs2 && {
+					knowsAbout: {
+						'@type': 'Thing',
+						name: 'Counter-Strike 2',
+						description: `ELO: ${stats.games.cs2.faceit_elo}, Уровень: ${stats.games.cs2.skill_level}`
+					}
+				})
+		  }
+		: null
 
-      {stats && (
-        <StatsDisplay 
-          stats={stats} 
-          matchesLimit={matchesLimit} 
-          setMatchesLimit={handleMatchesLimitChange}
-        />
-      )}
-    </div>
-  )
+	return (
+		<div className="container">
+			{structuredData && <StructuredData data={structuredData} />}
+			<div
+				style={{
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					marginBottom: '2rem',
+					position: 'relative',
+					flexWrap: 'wrap',
+					gap: '1rem',
+					width: '100%'
+				}}
+			>
+				<h1
+					className="title"
+					style={{
+						margin: 0,
+						textAlign: 'center',
+						flex: 1,
+						minWidth: '200px',
+						paddingRight: '140px',
+						fontFamily: 'monospace'
+					}}
+				>
+					{t('title')}
+				</h1>
+				<div
+					style={{
+						position: 'absolute',
+						right: 0,
+						top: '50%',
+						transform: 'translateY(-50%)',
+						zIndex: 10
+					}}
+				>
+					<LanguageSelector />
+				</div>
+			</div>
+
+			<div
+				style={{
+					marginBottom: '1rem',
+					display: 'flex',
+					gap: '1rem',
+					alignItems: 'flex-start',
+					flexDirection: 'row',
+					flexWrap: 'wrap'
+				}}
+			>
+				<Link
+					href="/"
+					style={{
+						background: '#1a1a1a',
+						border: '1px solid #333',
+						color: '#ffffff',
+						padding: '0.5rem 1rem',
+						borderRadius: '6px',
+						cursor: 'pointer',
+						fontSize: '0.9rem',
+						transition: 'all 0.2s',
+						whiteSpace: 'nowrap',
+						textDecoration: 'none',
+						// display: 'inline-block',
+						flexShrink: 0,
+						height: '-webkit-fill-available',
+						display: 'flex',
+						alignItems: 'center'
+					}}
+					onMouseEnter={e => {
+						e.currentTarget.style.background = '#2a2a2a'
+						e.currentTarget.style.borderColor = '#ffffff'
+					}}
+					onMouseLeave={e => {
+						e.currentTarget.style.background = '#1a1a1a'
+						e.currentTarget.style.borderColor = '#333'
+					}}
+				>
+					← {t('back')}
+				</Link>
+
+				<div style={{ flex: 1, minWidth: '200px', maxWidth: '100%' }}>
+					<form
+						onSubmit={e => {
+							e.preventDefault()
+							handleSearchSubmit()
+						}}
+					>
+						<SearchInput
+							value={searchInput}
+							onChange={setSearchInput}
+							onSubmit={handleSearchSubmit}
+							disabled={searchLoading || loading}
+						/>
+						{searchError && (
+							<div
+								style={{
+									color: '#ff4444',
+									fontSize: '0.85rem',
+									marginTop: '0.5rem'
+								}}
+							>
+								{searchError}
+							</div>
+						)}
+					</form>
+				</div>
+			</div>
+
+			{loading && <div className="loading">{t('loadingStats')}</div>}
+
+			{error && (
+				<div className="card">
+					<div className="error">{error}</div>
+				</div>
+			)}
+
+			{stats && (
+				<StatsDisplay
+					stats={stats}
+					matchesLimit={matchesLimit}
+					setMatchesLimit={handleMatchesLimitChange}
+				/>
+			)}
+		</div>
+	)
 }
-

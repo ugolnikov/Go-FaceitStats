@@ -1,148 +1,190 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from '@/i18n/navigation'
-import { useParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import SearchInput from '@/components/SearchInput'
 import LanguageSelector from '@/components/LanguageSelector'
-import StructuredData from '@/components/StructuredData'
+import SearchInput from '@/components/SearchInput'
+import { useRouter } from '@/i18n/navigation'
 import { addToHistory } from '@/lib/storage'
+import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import { useState } from 'react'
 
 export default function Home() {
-  setTimeout(() => {}, 3000)
-  const router = useRouter()
-  const params = useParams()
-  const locale = params.locale as string
-  const t = useTranslations()
-  
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+	setTimeout(() => {}, 3000)
+	const router = useRouter()
+	const params = useParams()
+	const locale = params.locale as string
+	const t = useTranslations()
 
-  const handleSubmit = async (e?: React.FormEvent | string, searchValue?: string) => {
-    console.log('handleSubmit called with:', { e, searchValue, input, eType: typeof e })
-    
-    // Если первый аргумент - строка (вызов из истории или SearchInput), используем её как searchValue
-    const actualSearchValue = typeof e === 'string' ? e : searchValue
-    if (e && typeof e === 'object' && typeof e.preventDefault === 'function') e.preventDefault();
-    const valueToSearch = actualSearchValue || input 
-    
-    console.log('handleSubmit: valueToSearch =', valueToSearch, 'actualSearchValue =', actualSearchValue)
-    
-    if (!valueToSearch || !valueToSearch.trim()) {
-      console.error('handleSubmit: Empty valueToSearch', { valueToSearch, actualSearchValue, input })
-      setError(t('error'))
-      return
-    }
+	const [input, setInput] = useState('')
+	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
 
-    setLoading(true)
-    setError(null)
+	const handleSubmit = async (
+		e?: React.FormEvent | string,
+		searchValue?: string
+	) => {
+		console.log('handleSubmit called with:', {
+			e,
+			searchValue,
+			input,
+			eType: typeof e
+		})
 
-    try {
-      // Сначала проверяем, существует ли игрок
-      const response = await fetch('/api/faceit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ input: valueToSearch.trim(), matchesLimit: 1 }), // Минимальный запрос для проверки
-      })
+		// Если первый аргумент - строка (вызов из истории или SearchInput), используем её как searchValue
+		const actualSearchValue = typeof e === 'string' ? e : searchValue
+		if (e && typeof e === 'object' && typeof e.preventDefault === 'function')
+			e.preventDefault()
+		const valueToSearch = actualSearchValue || input
+		if (!valueToSearch) return
+		console.log(
+			'handleSubmit: valueToSearch =',
+			valueToSearch,
+			'actualSearchValue =',
+			actualSearchValue
+		)
 
-      const data = await response.json()
+		if (!valueToSearch || !valueToSearch.trim()) {
+			console.error('handleSubmit: Empty valueToSearch', {
+				valueToSearch,
+				actualSearchValue,
+				input
+			})
+			setError(t('error'))
+			return
+		}
 
-      if (!response.ok) {
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: data.error,
-          code: data.code,
-          data: data,
-        })
+		setLoading(true)
+		setError(null)
 
-        let uiMessage = t('error')
+		try {
+			// Сначала проверяем, существует ли игрок
+			const response = await fetch('/api/faceit', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ input: valueToSearch.trim(), matchesLimit: 1 }) // Минимальный запрос для проверки
+			})
 
-        if (response.status === 404 || data.code === 'PLAYER_NOT_FOUND') {
-          uiMessage = t('playerNotFound')
-        } else if (response.status === 401) {
-          uiMessage = 'Ошибка авторизации API. Проверьте FACEIT_API_KEY/STEAM_API_KEY.'
-        } else if (response.status === 429) {
-          uiMessage = 'Превышен лимит запросов к API. Попробуйте позже.'
-        } else if (typeof data.error === 'string') {
-          uiMessage = data.error
-        }
+			const data = await response.json()
 
-        setError(uiMessage)
-        setLoading(false)
-        return
-      }
+			if (!response.ok) {
+				let uiMessage = t('error')
 
-      // Сохраняем в историю для автокомплита
-      addToHistory(valueToSearch.trim(), data.player?.nickname, data.player?.steam_id_64)
-      
-      // Создаем slug из никнейма или input
-      const slug = data.player?.nickname || encodeURIComponent(valueToSearch.trim())
-      
-      // Перенаправляем на страницу игрока с учетом локали
-      router.push(`/player/${slug}`)
-    } catch (err: any) {
-      console.error('Search Error:', {
-        message: err.message,
-        error: err,
-        input: valueToSearch,
-        stack: err.stack,
-      })
-      setError(t('error'))
-      setLoading(false)
-    }
-  }
+				if (response.status === 404 || data.code === 'PLAYER_NOT_FOUND') {
+					uiMessage = t('playerNotFound')
+				} else if (response.status === 401) {
+					uiMessage =
+						'Ошибка авторизации API. Проверьте FACEIT_API_KEY/STEAM_API_KEY.'
+				} else if (response.status === 429) {
+					uiMessage = 'Превышен лимит запросов к API. Попробуйте позже.'
+				} else if (typeof data.error === 'string') {
+					uiMessage = data.error
+				} else {
+					console.error('API Error:', {
+						status: response.status,
+						statusText: response.statusText,
+						error: data.error,
+						code: data.code,
+						data: data
+					})
+				}
 
+				setError(uiMessage)
+				setLoading(false)
+				return
+			}
 
-  return (
-    <div className="container">
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '2rem', 
-        position: 'relative',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        width: '100%'
-      }}>
-        <h1 className="title" style={{ width: '50%', margin: 0, textAlign: 'center', flex: 1, minWidth: '200px', paddingRight: '140px' }}>{t('title')}</h1>
-        <div style={{ 
-          position: 'relative', 
-          right: 0,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 10
-        }}>
-          <LanguageSelector />
-        </div>
-      </div>
+			// Сохраняем в историю для автозаполнение
+			addToHistory(
+				valueToSearch.trim(),
+				data.player?.nickname,
+				data.player?.steam_id_64
+			)
 
-      <div className="card">
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="search-input">{t('inputLabel')}</label>
-            <SearchInput
-              value={input}
-              onChange={setInput}
-              onSubmit={handleSubmit}
-              disabled={loading}
-            />
-          </div>
-          <button type="submit" className="btn" disabled={loading}>
-            {loading ? t('loading') : t('getStats')} 📷
-          </button>
-        </form>
+			// Создаем slug из имени или input
+			const slug =
+				data.player?.nickname || encodeURIComponent(valueToSearch.trim())
 
-        {error && <div className="error">{error}</div>}
-      </div>
+			// Перенаправляем на страницу игрока с учетом языка
+			router.push(`/player/${slug}`)
+		} catch (err: any) {
+			console.error('Search Error:', {
+				message: err.message,
+				error: err,
+				input: valueToSearch,
+				stack: err.stack
+			})
+			setError(t('error'))
+			setLoading(false)
+		}
+	}
 
-      {loading && <div className="loading">{t('loadingStats')}</div>}
-    </div>
-  )
+	return (
+		<div className="container">
+			<div
+				style={{
+					display: 'flex',
+					justifyContent: 'space-between',
+					alignItems: 'center',
+					marginBottom: '2rem',
+					position: 'relative',
+					flexWrap: 'wrap',
+					gap: '1rem',
+					width: '100%'
+				}}
+			>
+				<h1
+					className="title"
+					style={{
+						width: '50%',
+						margin: 0,
+						textAlign: 'center',
+						flex: 1,
+						minWidth: '200px',
+						paddingRight: '140px',
+						fontFamily: 'monospace'
+					}}
+				>
+					{t('title')}
+				</h1>
+				<div
+					style={{
+						position: 'relative',
+						right: 0,
+						top: '50%',
+						transform: 'translateY(-50%)',
+						zIndex: 10
+					}}
+				>
+					<LanguageSelector />
+				</div>
+			</div>
+
+			<div className="card">
+				<form onSubmit={handleSubmit}>
+					<div className="input-group">
+						<label htmlFor="search-input">{t('inputLabel')}</label>
+						<SearchInput
+							value={input}
+							onChange={setInput}
+							onSubmit={handleSubmit}
+							disabled={loading}
+						/>
+					</div>
+					<button
+						type="submit"
+						className="btn"
+						disabled={loading}
+					>
+						{loading ? t('loading') : t('getStats')} 📷
+					</button>
+				</form>
+
+				{error && <div className="error">{error}</div>}
+			</div>
+
+			{loading && <div className="loading">{t('loadingStats')}</div>}
+		</div>
+	)
 }
-
